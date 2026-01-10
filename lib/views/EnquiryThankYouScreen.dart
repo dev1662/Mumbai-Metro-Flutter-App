@@ -1,0 +1,716 @@
+// lib/views/EnquiryThankYouScreen.dart
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:new_packers_application/lib/constant/app_color.dart';
+import 'package:new_packers_application/lib/models/customer_data_model.dart';
+import 'dart:convert';
+import '../lib/constant/app_formatter.dart';
+import '../lib/payment_service/payment_service.dart';
+import '../models/EnquiryResponse.dart';
+import 'HomeServiceView.dart';
+
+const Color darkBlue = Color(0xFF03669d);
+const Color mediumBlue = Color(0xFF37b3e7);
+const Color lightBlue = Color(0xFF7ed2f7);
+const Color whiteColor = Color(0xFFf7f7f7);
+
+class EnquiryBookingConfirmationWithAmount extends StatefulWidget {
+  final EnquiryResponse enquiryResponse;
+
+  const EnquiryBookingConfirmationWithAmount({
+    super.key,
+    required this.enquiryResponse,
+  });
+
+  @override
+  State<EnquiryBookingConfirmationWithAmount> createState() =>
+      _EnquiryBookingConfirmationWithAmountState();
+}
+
+class _EnquiryBookingConfirmationWithAmountState
+    extends State<EnquiryBookingConfirmationWithAmount> {
+  int calculatePercentage(double amount) {
+    return (amount * (10 / 100)).toInt();
+  }
+
+  int calculateTotalAmount(double amount, int addingAmount) {
+    return (amount + addingAmount).toInt();
+  }
+
+  bool isPaymentLoading = false;
+
+  Future<CustomerModel?> fetchData() async {
+    try {
+      final String baseUrl = "http://54kidsstreet.org";
+
+      final response = await http.get(
+        Uri.parse(
+            "$baseUrl/api/customer/${widget.enquiryResponse.data?.customerId ?? 0}"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      );
+
+      log("➡ API Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return CustomerModel.fromJson(jsonDecode(response.body));
+      } else {
+        log("⚠ Something went wrong");
+        return null;
+      }
+    } catch (e) {
+      log("❌ Error fetching customer: $e");
+      return null;
+    }
+  }
+
+  _payButtonSubmit() async {
+    try {
+      setState(() {
+        isPaymentLoading = true;
+      });
+      final customerModel = await fetchData();
+      PaymentService().startPaymentFlow(
+        context,
+        amount: calculatePercentage(double.parse(
+            (widget.enquiryResponse.data?.amount ?? 0).toString())),
+        customerData: customerModel!,
+        orderNumber: (widget.enquiryResponse.data?.orderNo ?? '').toString(),
+      );
+    } catch (e) {
+      setState(() {
+        isPaymentLoading = false;
+      });
+      debugPrint('Error--->>${e.toString()}');
+    } finally {
+      setState(() {
+        isPaymentLoading = false;
+      });
+    }
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('QR screen',style: TextStyle(fontFamily: 'Poppins',color: Colors.white),),
+    //     backgroundColor: Colors.green,
+    //   ),
+    // );
+    // Navigator.pushReplacement(
+    //   context,
+    // MaterialPageRoute(
+    //   builder: (context) => EnquiryThankYouScreen(enquiryResponse: response),
+    // ),
+    // MaterialPageRoute(
+    //   builder: (context) => EnquiryThankYouScreen(
+    //       enquiryResponse: widget.enquiryResponse),
+    // ),
+    // );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: whiteColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(60),
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 50,
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              const Text(
+                'Booking Confirmation',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: darkBlue,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Your Estimate',
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: darkBlue,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.start,
+              ),
+              Center(
+                child: Text(
+                  '\u20B9${double.parse((widget.enquiryResponse.data?.amount ?? 0).toString()).toStringAsFixed(0)}',
+                  style: const TextStyle(
+                      fontSize: 30,
+                      color: darkBlue,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/delivery-truck.png',
+                    height: 50,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Includes Door to Door Delivery with Packing, Transportation, Loading & Unloading.',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: darkBlue,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Poppins',
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+              Divider(
+                color: AppColor.lightBlue,
+              ),
+              const SizedBox(height: 15),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Book your slot!',
+                    style: const TextStyle(
+                        fontSize: 17,
+                        color: darkBlue,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  Text(
+                    'Pay only 10% advance : \u20B9 ${calculatePercentage(double.parse((widget.enquiryResponse.data?.amount ?? 0).toString()))}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: darkBlue,
+                      fontFamily: 'Poppins',
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              // Text(
+              //   'Total amount to pay : ${calculateTotalAmount(double.parse((widget.enquiryResponse.data?.amount ?? 0).toString()), calculatePercentage(double.parse((widget.enquiryResponse.data?.amount ?? 0).toString())))}',
+              //   style: const TextStyle(
+              //     fontSize: 16,
+              //     color: darkBlue,
+              //     fontFamily: 'Poppins',
+              //   ),
+              //   textAlign: TextAlign.center,
+              // ),
+              // const SizedBox(height: 40),
+              Row(
+                spacing: 20,
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) => const HomeServiceView()),
+                            (Route<dynamic> route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mediumBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: const Text(
+                          'Book Later',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: whiteColor,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Row(
+                spacing: 20,
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: isPaymentLoading ? null : _payButtonSubmit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isPaymentLoading ? lightBlue : mediumBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: isPaymentLoading
+                            ? Center(
+                                child: CircularProgressIndicator(),
+                              )
+                            : const Text(
+                                'Pay & Book Now',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: whiteColor,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class EnquiryThankYouScreen extends StatelessWidget {
+  final EnquiryResponse enquiryResponse;
+
+  const EnquiryThankYouScreen({super.key, required this.enquiryResponse});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: whiteColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Container(
+              //   height: 120,
+              //   width: 120,
+              //   decoration: BoxDecoration(
+              //     color: Colors.green,
+              //     borderRadius: BorderRadius.circular(60),
+              //   ),
+              //   child: const Icon(
+              //     Icons.check,
+              //     color: Colors.white,
+              //     size: 80,
+              //   ),
+              // ),
+              // const SizedBox(height: 30),
+              // const Text(
+              //   'Thank You!',
+              //   style: TextStyle(
+              //     fontSize: 32,
+              //     fontWeight: FontWeight.bold,
+              //     color: darkBlue,
+              //     fontFamily: 'Poppins',
+              //   ),
+              //   textAlign: TextAlign.center,
+              // ),
+              // const SizedBox(height: 15),
+              // Text(
+              //   enquiryResponse.msg,
+              //   style: const TextStyle(
+              //     fontSize: 18,
+              //     color: darkBlue,
+              //     fontFamily: 'Poppins',
+              //   ),
+              //   textAlign: TextAlign.center,
+              // ),
+              // const SizedBox(height: 30),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Your Enquiry Details:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: darkBlue,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    _buildDetailRow('Customer ID:',
+                        enquiryResponse.data?.customerId ?? 'N/A'),
+                    _buildDetailRow('Request Number:',
+                        '#${enquiryResponse.data?.orderNo ?? 'N/A'}'),
+                    _buildDetailRow('Pickup Location:',
+                        enquiryResponse.data?.pickupLocation ?? 'N/A'),
+                    _buildDetailRow('Pickup Floor Number:',
+                        enquiryResponse.data?.floorNumber ?? 'N/A'),
+                    _buildDetailRow(
+                        'Pickup Service Lift:',
+                        (enquiryResponse.data?.pickupServicesLift ?? '0') == '0'
+                            ? 'Not Available'
+                            : 'Available'),
+                    _buildDetailRow('Drop Location:',
+                        enquiryResponse.data?.dropLocation ?? 'N/A'),
+                    if (enquiryResponse.data?.flatShopNo == 'NONE' &&
+                        enquiryResponse.data?.destinationFloorNumber != '') ...[
+                      _buildDetailRow(
+                          'Destination Floor Number:',
+                          enquiryResponse.data?.destinationFloorNumber ??
+                              'N/A'),
+                    ],
+                    _buildDetailRow(
+                        'Drop Service Lift:',
+                        (enquiryResponse.data?.dropServicesLift ?? '0') == '0'
+                            ? 'Not Available'
+                            : 'Available'),
+                    if (enquiryResponse.data?.flatShopNo != 'NONE') ...[
+                      _buildDetailRow(
+                        'Flat/Shop No:',
+                        enquiryResponse.data?.flatShopNo == 'NONE'
+                            ? 'NA'
+                            : (enquiryResponse.data?.flatShopNo ?? 'N/A'),
+                      ),
+                    ],
+                    _buildDetailRow(
+                      'Shifting Date:',
+                      AppFormatter.dateFormater(
+                          date:
+                              enquiryResponse.data?.shippingDateTime ?? 'N/A'),
+                    ),
+                    _buildDetailRow(
+                      'Created Date:',
+                      AppFormatter.convertCreateDate(
+                          input: enquiryResponse.data?.createdAt ?? 'N/A'),
+                    ),
+                    _buildDetailRow('Total KM: ',
+                        '${enquiryResponse.data?.distance ?? ''}'),
+                    if ((enquiryResponse.data?.distance ?? 0) != 0) ...[
+                      _buildDetailRow('Total CFT: ',
+                          (enquiryResponse.totalCft ?? 0).toString()),
+                    ]
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (enquiryResponse.data?.productsItem != null &&
+                  enquiryResponse.data!.productsItem.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Selected Inventory:',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: darkBlue,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      ..._parseAndDisplayProducts(
+                        enquiryResponse.data!.productsItem,
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 20),
+              // Container(
+              //   padding: const EdgeInsets.all(15),
+              //   decoration: BoxDecoration(
+              //     color: lightBlue.withOpacity(0.2),
+              //     borderRadius: BorderRadius.circular(10),
+              //   ),
+              //   child: const Text(
+              //     'Our team will contact you soon to confirm your shifting request. Thank you for choosing Mumbai Metro Packers and Movers!',
+              //     style: TextStyle(
+              //       fontSize: 16,
+              //       color: darkBlue,
+              //       fontFamily: 'Poppins',
+              //     ),
+              //     textAlign: TextAlign.center,
+              //   ),
+              // ),
+              // const SizedBox(height: 30),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mediumBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: const Text(
+                          // 'Back to Home',
+                          'Back',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: whiteColor,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Navigator.of(context).pushAndRemoveUntil(
+                          //   MaterialPageRoute(
+                          //       builder: (context) => const HomeServiceView()),
+                          //   (Route<dynamic> route) => false,
+                          // );
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  EnquiryBookingConfirmationWithAmount(
+                                enquiryResponse: enquiryResponse,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mediumBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: const Text(
+                          // 'Back to Home',
+                          'Next',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: whiteColor,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _parseAndDisplayProducts(String productsJson) {
+    try {
+      // First decode outer JSON string
+      final decoded = json.decode(productsJson);
+
+      // If still string, decode again (handle double encoding)
+      List<dynamic> products =
+          decoded is String ? json.decode(decoded) : decoded;
+
+      return products.map((product) {
+        String productName = product['product_name'] ?? 'Unknown Product';
+        String quantity = product['quantity'] ?? '0';
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Icon for product
+                Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                    color: mediumBlue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      (products.indexOf(product) + 1).toString(),
+                      style: TextStyle(fontSize: 18, color: darkBlue),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Product name
+                Expanded(
+                  child: Text(
+                    productName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: darkBlue,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+
+                // Quantity badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: mediumBlue,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Qty: $quantity',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList();
+    } catch (e) {
+      return [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            "Error parsing products: ${e.toString()}",
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.red,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      ];
+    }
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: darkBlue,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: darkBlue,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
