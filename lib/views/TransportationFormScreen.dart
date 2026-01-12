@@ -73,7 +73,7 @@ class _TransportationFormScreenState extends State<TransportationFormScreen> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime(2026),
+      lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
@@ -313,7 +313,7 @@ class _TransportationFormScreenState extends State<TransportationFormScreen> {
                               // Banner Image - Only if exists
                               if (hasBanner)
                                 Container(
-                                  height: 180,
+                                  height: 240,
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),

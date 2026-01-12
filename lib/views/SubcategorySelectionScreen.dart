@@ -300,7 +300,7 @@ class _SubCategorySelectionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Select a Subcategory',
+                    'Select a Inventory Subcategory',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -375,7 +375,7 @@ class _SubCategorySelectionScreenState
                     : selectedSubcategory == null
                         ? const Center(
                             child: Text(
-                                'Please select a subcategory to see products',
+                                'Please select a subcategory to see inventory',
                                 style: TextStyle(color: darkBlue)))
                         : products.isEmpty
                             ? const Center(

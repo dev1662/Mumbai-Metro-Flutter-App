@@ -162,7 +162,8 @@ class _AppDrawerState extends State<AppDrawer> {
 
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10000),
-                  child: Image.asset('assets/parcelwala10.jpeg', height: 270),
+                  child: Image.asset('assets/parcelwala10.jpeg',
+                      height: 180, width: 100),
                 ),
                 SizedBox(height: 10),
                 // Text(

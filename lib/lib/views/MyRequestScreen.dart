@@ -677,7 +677,7 @@ class _MyRequestScreenState extends State<MyRequestScreen> {
                                         ),
                                       ),
                                       child: Text(
-                                        'Balance to pay ${calculateBalanceAmount(paidAmount: (paymentDetails.last['amount'] ?? 0).toString(), totalAmount: (enquiry["total_amount"] ?? 0).toString())}',
+                                        'Balance to Pay ${calculateBalanceAmount(paidAmount: (paymentDetails.last['amount'] ?? 0).toString(), totalAmount: (enquiry["total_amount"] ?? 0).toString())}',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,

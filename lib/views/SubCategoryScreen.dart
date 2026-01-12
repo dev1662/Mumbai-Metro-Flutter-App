@@ -247,7 +247,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(25),
                             child: FadeInImage.assetNetwork(
-                              placeholder: 'assets/applogo2.jpg',
+                              placeholder: 'assets/updatedlogo.jpeg',
                               image: imageUrl,
                               fit: BoxFit.fill,
                               alignment: Alignment.center,
@@ -268,7 +268,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Image.asset(
-                              'assets/applogo2.jpg',
+                              'assets/updatedlogo.jpeg',
                               fit: BoxFit.fill,
                               alignment: Alignment.center,
                             ),
@@ -662,7 +662,8 @@ class _ServiceFormScreenWithCoordinateState
                             children: [
                               if (hasBanner)
                                 Container(
-                                  height: 180,
+                                  height: 240, // earlier 180 by dev
+                                  // height: 180,
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
@@ -1594,7 +1595,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                           return null;
                         },
                         decoration: InputDecoration(
-                          labelText: 'Notes/Specific Instructions',
+                          labelText: 'Notes/Special Instructions',
                           labelStyle: const TextStyle(color: darkBlue),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),

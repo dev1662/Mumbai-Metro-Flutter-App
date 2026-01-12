@@ -142,7 +142,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                         children: [
                           if (hasBanner)
                             Container(
-                              height: 180,
+                              height: 240,
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),

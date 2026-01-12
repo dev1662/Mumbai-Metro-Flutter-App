@@ -489,9 +489,10 @@ class _HomeServiceViewState extends State<HomeServiceView> {
         );
       },
       style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 22),
         backgroundColor: whiteColor,
         side: const BorderSide(color: mediumBlue, width: 2),
-        minimumSize: const Size(double.infinity, 60),
+        // minimumSize: const Size(double.infinity, 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: Column(
@@ -506,7 +507,7 @@ class _HomeServiceViewState extends State<HomeServiceView> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(1000),
                       child: FadeInImage.assetNetwork(
-                        placeholder: 'assets/parcelwala4.jpg',
+                        placeholder: 'assets/updatedlogo.jpeg',
                         image: imageUrl,
                         fit: BoxFit.fill,
                         alignment: Alignment.center,
@@ -514,23 +515,28 @@ class _HomeServiceViewState extends State<HomeServiceView> {
                           print(
                             'Failed to load image for $name: $imageUrl, Error: $error',
                           );
-                          return Icon(defaultIcon, color: mediumBlue, size: 28);
+                          return Icon(defaultIcon, color: mediumBlue, size: 40);
                         },
                       ),
                     ),
                   )
-                : Icon(defaultIcon, color: mediumBlue, size: 35),
+                : Icon(defaultIcon, color: mediumBlue, size: 40),
           ),
-          const SizedBox(height: 5),
-          Text(
-            name,
-            style: const TextStyle(
-              color: darkBlue,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+          const SizedBox(height: 8),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Text(
+              name,
+              style: const TextStyle(
+                color: darkBlue,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 14), // 👈 SAFE bottom buffer
         ],
       ),
     );
@@ -547,13 +553,13 @@ class _HomeServiceViewState extends State<HomeServiceView> {
       backgroundColor: darkBlue,
       appBar: AppBar(
         title: Text(
-          'Mumbai Metro Packers and Movers',
+          'Mumbai Metro Services',
           maxLines: 1,
           overflow: TextOverflow.ellipsis, // ❗ never breaks
           style: TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 20,
             color: whiteColor,
           ),
         ),
@@ -756,6 +762,7 @@ class _HomeServiceViewState extends State<HomeServiceView> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 35)
                 ],
               ),
             ),
